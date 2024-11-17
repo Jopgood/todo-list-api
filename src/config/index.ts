@@ -9,18 +9,21 @@ const configSchema = z.object({
   apiKey: z.string().min(1),
 });
 
-const validateConfig = (config: Record<string, unknown>): z.infer<typeof configSchema> => {
-  try {
-    return configSchema.parse({
-      port: parseInt(config.PORT || '3000', 10),
-      nodeEnv: config.NODE_ENV,
-      apiKey: config.API_KEY,
-    });
-  } catch (error) {
-    throw new Error(
-      `Config validation error: ${error instanceof Error ? error.message : 'Unknown error'}`,
-    );
+type Config = z.infer<typeof configSchema>;
+
+const validateEnv = (): Config => {
+  const parsed = configSchema.safeParse({
+    port: Number(process.env.PORT) || 3000,
+    nodeEnv: process.env.NODE_ENV,
+    apiKey: process.env.API_KEY,
+  });
+
+  if (!parsed.success) {
+    console.error('❌ Invalid environment variables:', parsed.error.toString());
+    process.exit(1);
   }
+
+  return parsed.data;
 };
 
-export const config = validateConfig(process.env);
+export const config = validateEnv();
