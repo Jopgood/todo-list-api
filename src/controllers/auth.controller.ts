@@ -12,7 +12,7 @@ export class AuthController {
     req: Request<object, object, RegisterSchema>,
     res: Response,
   ): Promise<void> => {
-    const { email, password } = req.body;
+    const { name, email, password } = req.body;
 
     const existingUser = db.prepare('SELECT id FROM users WHERE email = ?').get(email);
     if (existingUser) {
@@ -22,8 +22,8 @@ export class AuthController {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const result = db
-      .prepare('INSERT INTO users (email, password) VALUES (?, ?)')
-      .run(email, hashedPassword);
+      .prepare('INSERT INTO users (name, email, password) VALUES (? ?, ?)')
+      .run(name, email, hashedPassword);
 
     const token = jwt.sign({ userId: result.lastInsertRowid }, config.jwtSecret, {
       expiresIn: '24h',

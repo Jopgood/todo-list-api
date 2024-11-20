@@ -7,5 +7,8 @@ const todosController = new TodosController();
 
 todosRouter.use(authenticate);
 todosRouter.get('/', todosController.list);
+todosRouter.post('/', todosController.create);
+todosRouter.put('/:id', todosController.update);
+todosRouter.delete('/:id', todosController.delete);
 
 export { todosRouter };
